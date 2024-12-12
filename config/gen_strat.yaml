@@ -1,0 +1,23 @@
+DataAPIYahoo:
+  comp: ^SPX
+  start: 2010-01-01
+  end: 2024-08-01
+  scale: 1d
+DataAPITAIFEX:
+  start: 2020-01-02
+  end: 2021-01-02
+  market_code: 0
+DataLocal:
+  path: tick_data/sp500.csv
+task: syn_spsl
+trials: 50
+Class:
+  strat: src.indicators.ma.SMA
+  params:
+    - 8
+    - 21
+Settings:
+  initial_cap: 10000
+  trans_cost: 0.001
+  sl_thres: -0.10
+  sp_thres: 0.15

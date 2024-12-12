@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "genstrat"
+version = "0.1.0"
+description = ""
+authors = ["AbnerTeng <abnerteng16@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+beautifulsoup4 = "4.11.1"
+matplotlib = "3.5.2"
+numpy = "^1.26.4"
+pandas = "1.4.2"
+pyyaml = "6.0.2"
+rich = "13.8.1"
+urllib3 = "1.26.9"
+yfinance = "0.2.43"
+omegaconf = "^2.3.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
