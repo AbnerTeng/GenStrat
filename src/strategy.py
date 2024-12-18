@@ -2,6 +2,7 @@ from typing import Dict, List, SupportsIndex, Tuple, Any, Optional
 
 import numpy as np
 import pandas as pd
+from rich.progress import track
 
 from .base.base_strategy import BackTest
 from .utils.logic_utils import (
@@ -77,10 +78,10 @@ class Strategy:
         if self.indicator.tag == "RSI":
             rsi = [col for col in self.data.columns if "RSI" in col]
 
-            self.trade_logics["long"].append(self.data[rsi[0]].iloc[idx] < 30)
-            self.trade_logics["short"].append(self.data[rsi[0]].iloc[idx] > 70)
-            self.trade_logics["sell"] = self.trade_logics["short"]
-            self.trade_logics["buytocover"] = self.trade_logics["long"]
+            self.trade_logics["long"].append(self.data[rsi[0]].iloc[idx] <= 30)
+            self.trade_logics["short"].append(self.data[rsi[0]].iloc[idx] >= 70)
+            self.trade_logics["sell"].append(self.data[rsi[0]].iloc[idx] >= 70)
+            self.trade_logics["buytocover"].append(self.data[rsi[0]].iloc[idx] <= 30)
 
         if self.indicator.tag == "MACD":
             self.trade_logics["long"].append(
@@ -146,17 +147,9 @@ class RunStrategy(BackTest):
         """
         Run rolling strategy
         """
-        curr_cond = None
-        t = 0
-        curr_ret = 0
+        curr_cond, curr_ret, t = None, 0, 0
 
-        if start_idx is None:
-            start_idx = 0
-
-        if stop_idx is None:
-            stop_idx = len(self.data) - 1
-
-        for idx in range(start_idx, stop_idx, 1):
+        for idx in track(range(start_idx, stop_idx, 1)):
             logics = self.strat.get_strategy(idx)
             curr_cond, t, curr_ret = self.daily_run(idx, curr_cond, logics, t, curr_ret)
 
@@ -164,6 +157,7 @@ class RunStrategy(BackTest):
                 logics[key] = []
 
         ret = self.calculate_return()
+
         return ret
 
 
@@ -187,8 +181,8 @@ class RunRollingStrategy(BackTest):
         strat: Strategy,
         initial_cap: float = 10000,
         trans_cost: float = 0.001,
-        sl_thres: float | None = -np.inf,
-        sp_thres: float | None = np.inf,
+        sl_thres: Optional[float] = -np.inf,
+        sp_thres: Optional[float] = np.inf,
     ) -> None:
         super().__init__(data, initial_cap, trans_cost, sl_thres, sp_thres)
         self.data = data.fillna(0) if sum(data.isna().sum()) > 0 else data
