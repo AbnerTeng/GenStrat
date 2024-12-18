@@ -12,12 +12,11 @@ DataLocal:
 task: syn_spsl
 trials: 50
 Class:
-  strat: src.indicators.ma.SMA
+  strat: src.indicators.rsi.RSI
   params:
-    - 8
-    - 21
+    - 14
 Settings:
   initial_cap: 10000
   trans_cost: 0.001
-  sl_thres: -0.10
-  sp_thres: 0.15
+  sl_thres: -0.03
+  sp_thres: 0.10
