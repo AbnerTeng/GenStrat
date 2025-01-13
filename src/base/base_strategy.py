@@ -20,8 +20,8 @@ class BackTest:
         data: Any,
         initial_cap: float,
         trans_cost: float,
-        sl_thres: Optional[float] = None,
-        sp_thres: Optional[float] = None,
+        sl_thres: Optional[float] = -np.inf,
+        sp_thres: Optional[float] = np.inf,
     ) -> None:
         """
         strategy: backtest strategy
@@ -33,8 +33,8 @@ class BackTest:
         self.data = data
         self.cap = initial_cap
         self.cost = trans_cost
-        self.sl_thres = sl_thres if sl_thres is not None else -np.inf
-        self.sp_thres = sp_thres if sp_thres is not None else np.inf
+        self.sl_thres = sl_thres
+        self.sp_thres = sp_thres
         self.trade_log = {
             "long": [],
             "sell": [],
@@ -42,7 +42,7 @@ class BackTest:
             "short": [],
         }
         self.trajectory = []
-        self.return_log = {"date": [], "return": []}
+        self.return_log = {"date": [], "return": [], "transac_cumret": []}
 
     def daily_run(
         self,
@@ -60,6 +60,7 @@ class BackTest:
         if curr_cond is None:
             self.return_log["return"].append(0)
             curr_ret = 0
+            self.return_log["transac_cumret"].append(curr_ret)
 
             if all(logics["long"]):
                 curr_cond = "long"
@@ -74,10 +75,11 @@ class BackTest:
                 self.return_log["return"][-1] = -self.cost
 
         elif curr_cond == "long":
-            ret = (
+            single_ret = (
                 self.data["open"].iloc[idx + 1] - self.data["open"].iloc[idx]
             ) / self.data["open"].iloc[idx]
-            curr_ret += ret
+            curr_ret += single_ret
+            self.return_log["transac_cumret"].append(curr_ret)
 
             if (
                 all(logics["sell"])
@@ -85,19 +87,23 @@ class BackTest:
                 or stop_loss(curr_ret, self.sl_thres)
                 or stop_profit(curr_ret, self.sp_thres)
             ):
-                self.return_log["return"].append(ret - self.cost)
+                tot_ret = (
+                    self.data["open"].iloc[idx + 1] - self.data["open"].iloc[t]
+                ) / self.data["open"].iloc[t]
+                self.return_log["return"].append(tot_ret - self.cost)
                 self.trade_log["sell"].append(idx + 1)
                 curr_cond = None
-                self.trajectory.append((t, idx + 1, ret - self.cost))
+                self.trajectory.append((t, idx + 1, tot_ret - self.cost))
 
             else:
                 self.return_log["return"].append(0)
 
         elif curr_cond == "short":
-            ret = (
+            single_ret = (
                 self.data["open"].iloc[idx] - self.data["open"].iloc[idx + 1]
             ) / self.data["open"].iloc[idx]
-            curr_ret += ret
+            curr_ret += single_ret
+            self.return_log["transac_cumret"].append(curr_ret)
 
             if (
                 all(logics["buytocover"])
@@ -105,17 +111,20 @@ class BackTest:
                 or stop_loss(curr_ret, self.sl_thres)
                 or stop_profit(curr_ret, self.sp_thres)
             ):
-                self.return_log["return"].append(ret - self.cost)
+                tot_ret = (
+                    self.data["open"].iloc[t] - self.data["open"].iloc[idx + 1]
+                ) / self.data["open"].iloc[t]
+                self.return_log["return"].append(tot_ret - self.cost)
                 self.trade_log["buytocover"].append(idx + 1)
                 curr_cond = None
-                self.trajectory.append((t, idx + 1, ret - self.cost))
+                self.trajectory.append((t, idx + 1, tot_ret - self.cost))
 
             else:
                 self.return_log["return"].append(0)
 
         return curr_cond, t, float(curr_ret)
 
-    def run(self, start_idx: SupportsIndex, stop_idx: SupportsIndex) -> Any:
+    def run(self) -> Any:
         """
         Run full backtest process
         """

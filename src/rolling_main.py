@@ -41,12 +41,13 @@ if __name__ == "__main__":
     df = transfer_colnames(data)
     GlobalDataManager.set_data(df)
     i, val_year, last_year = 1, 0, df.index[-1].year
-    full_log, full_trajectory, full_return_log, full_date, full_param = (
+    full_log, full_trajectory, full_return_log, full_date, full_param, full_transac_cumret = (
         [],
         [],
         [],
         [],
         [],
+        []
     )
     ModelClass = get_class(cfg.Class.strat)
     ind = ModelClass(*cfg.Class.params)
@@ -104,12 +105,14 @@ if __name__ == "__main__":
         full_return_log.extend(valid_runner.return_log["return"])
         full_date.extend(valid_runner.return_log["date"])
         full_param.extend(period_param)
+        full_transac_cumret.extend(valid_runner.return_log["transac_cumret"])
 
         GlobalDataManager.reset()
 
     dic = {
         "date": full_date,
         "return": full_return_log,
+        "for_stoploss": full_transac_cumret,
         "trade_log": full_log,
         "trajectory": full_trajectory,
         "param": full_param,

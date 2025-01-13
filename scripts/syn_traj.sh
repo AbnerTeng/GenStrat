@@ -14,8 +14,8 @@ sp_sl_pair=("-0.99 0.99" "-0.01 0.05" "-0.02 0.10" "-0.05 0.10" "-0.05 0.05" "-0
 #     yq eval ".Settings.sl_thres = $sl_thres | .Settings.sp_thres = $sp_thres" -i config/gen_strat.yaml
 #     yq eval ".Class.strat = \"$strat\" | .Class.params = $param_list" -i config/gen_strat.yaml
 
-#     poetry shell
-#     poetry run python -m src.rolling_main --data_source self
+#     uv shell
+#     uv run python -m src.rolling_main --data_source self
 # done
 
 
@@ -33,8 +33,8 @@ sp_sl_pair=("-0.99 0.99" "-0.01 0.05" "-0.02 0.10" "-0.05 0.10" "-0.05 0.05" "-0
 #     yq eval ".Settings.sl_thres = $sl_thres | .Settings.sp_thres = $sp_thres" -i config/gen_strat.yaml
 #     yq eval ".Class.strat = \"$strat\" | .Class.params = $param_list" -i config/gen_strat.yaml
 
-#     poetry shell
-#     poetry run python -m src.rolling_main --data_source self
+#     uv shell
+#     uv run python -m src.rolling_main --data_source self
 # done
 
 
@@ -52,8 +52,8 @@ for pair in "${sp_sl_pair[@]}"; do
     yq eval ".Settings.sl_thres = $sl_thres | .Settings.sp_thres = $sp_thres" -i config/gen_strat.yaml
     yq eval ".Class.strat = \"$strat\" | .Class.params = $param_list" -i config/gen_strat.yaml
 
-    poetry shell
-    poetry run python -m src.rolling_main --data_source self
+    uv shell
+    uv run python -m src.rolling_main --data_source self
 done
 
 
@@ -71,6 +71,6 @@ done
 #     yq eval ".Class.strat = \"$strat\" | .Class.params = $param_list" -i config/gen_strat.yaml
 #     yq eval ".Settings.sl_thres = $sl_thres | .Settings.sp_thres = $sp_thres" -i config/gen_strat.yaml
 
-#     poetry shell
-#     poetry run python -m src.rolling_main --data_source self
+#     uv shell
+#     uv run python -m src.rolling_main --data_source self
 # done

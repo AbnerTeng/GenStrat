@@ -17,21 +17,47 @@ Simple Quantitative strategies such as SMA, EWM, BBand, RSI, etc. are always the
 
 ## Installation
 
-git clone
+### git clone
 
 ```bash
 git clone https://github.com/AbnerTeng/GenStrat.git
 
-poetry install
+cd GenStrat
 ```
 
-through docker (tbd)
+### Install through uv (recommended)
 
-through pip (tbd)
+```bash
+uv init && uv venv
+
+source .venv/bin/activate
+
+uv pip install -r requirements.txt
+```
+
+### Install through pip
+
+```bash
+python -m venv .venv
+
+source .venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+### Install through docker (tbd)
 
 ## Usage
 
-1. Cutomize your configuration in `config/gen_strat.yaml`
+1. Download dataset (optional)
+
+> Modify the config file `config/stock_id.yaml` to get the stock id you want to download.
+
+```bash
+python -m src.data.get_state
+```
+
+2. Cutomize your configuration in `config/gen_strat.yaml`
 
 - Brief explanation of configuration
 
@@ -61,11 +87,11 @@ Settings:
 1. Run single strategy backtesting with below command
 
 ```bash
-poetry shell
-poetry run python -m src.rolling_main --data_source <data_source> --plot
+uv shell
+uv run python -m src.rolling_main --data_source <data_source> --plot
 
 # Example
-poetry run python -m src.rolling_main --data_source yahoo --plot
+uv run python -m src.rolling_main --data_source yahoo --plot
 ```
 
 (Alternative) Run multiple strategies backtesting with below command
