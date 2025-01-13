@@ -14,7 +14,7 @@ from .utils.general_utils import load_config, get_class
 from .utils.data_utils import transfer_colnames
 from .get_data import DataAPI
 from .base.base_indicator import GlobalDataManager
-from .indicators import BB, EMA, RSI, SMA
+from .indicators import BB, EMA, RSI, SMA, MACD
 
 
 def get_args() -> Namespace:
@@ -23,7 +23,9 @@ def get_args() -> Namespace:
     """
     parser = ArgumentParser()
     parser.add_argument("--data_source", type=str, default="self")
+    parser.add_argument("--log_dest", type=str, default="trade_log")
     parser.add_argument("--plot", "-p", action="store_true")
+
     return parser.parse_args()
 
 
@@ -40,18 +42,11 @@ if __name__ == "__main__":
     data = fetcher.fetch(api_map[args.data_source])
     df = transfer_colnames(data)
     GlobalDataManager.set_data(df)
-    full_log, full_trajectory, full_return_log, full_date, full_param, full_transac_cumret = (
-        [],
-        [],
-        [],
-        [],
-        [],
-        []
-    )
+    full_log, full_trajectory, full_return_log, full_date, full_param, full_transac_cumret = ([], [], [], [], [], [])
     ModelClass = get_class(cfg.Class.strat)
     ind = ModelClass(*cfg.Class.params)
     last_idx, half_ids = None, []
-    ind: Union[BB, EMA, RSI, SMA]
+    ind: Union[BB, EMA, MACD, RSI, SMA]
 
     if not RANDOM_PARAM:
         cfg.trials = 1
@@ -81,22 +76,14 @@ if __name__ == "__main__":
     print(f"Cum ret: {np.cumsum(dic['return'])[-1]}")
 
     if cfg.task == "syn_spsl":
+        if args.log_dest not in os.listdir():
+            os.mkdir(args.log_dest)
+
         pkl_filename = f"{str(ind)}_{cfg.Settings.sl_thres}_{cfg.Settings.sp_thres}.pkl"
-        folder_name = f"synthetic_{str(ind)}"
+        folder_name = f"all_synthetic_{str(ind)}"
 
-        if folder_name not in os.listdir("trade_log"):
-            os.mkdir(f"trade_log/{folder_name}")
+        if folder_name not in os.listdir(args.log_dest):
+            os.mkdir(f"{args.log_dest}/{folder_name}")
 
-        with open(f"trade_log/{folder_name}/{pkl_filename}", "wb") as pkl_file:
-            pickle.dump(dic, pkl_file)
-
-    else:
-        pkl_filename = (
-            f"{ind.tag}_new_{cfg.Settings.sl_thres}_{cfg.Setting.sp_thres}.pkl"
-        )
-
-        if pkl_filename in os.listdir("trade_log"):
-            pkl_filename = f"{ind.tag}_new_{np.random.randint(1000)}.pkl"
-
-        with open(f"trade_log/{pkl_filename}", "wb") as pkl_file:
+        with open(f"{args.log_dest}/{folder_name}/{pkl_filename}", "wb") as pkl_file:
             pickle.dump(dic, pkl_file)

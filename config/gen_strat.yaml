@@ -8,7 +8,7 @@ DataAPITAIFEX:
   end: 2021-01-02
   market_code: 0
 DataLocal:
-  path: tick_data/sp500.csv
+  path: env_data/sp500.csv
 task: syn_spsl
 trials: 50
 Class:
